@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Show - Perguntas e Respostas</title>
+    <style>
+
+	h1 {
+	background-color: #020b4d;
+	color: white;
+	margin: 0;
+	padding: 30px;
+	 }
+        body {
+	    padding: 10px 20px 30px 40px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0px;
+            background-color: #f0f8ff;
+            color: black;
+        }
+        .question-container {
+            margin: 20px auto;
+            padding: 20px;
+            border: 2px solid #87ceeb;
+            border-radius: 12px;
+            background-color: #ffffff;
+            max-width: 600px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+	    font-weight: bold;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #87ceeb;
+            color: black;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #4682b4;
+        }
+        #answers button {
+            display: block;
+            margin: 10px auto;
+            width: 80%;
+        }
+        #answers button.selected {
+            background-color: #32cd32;
+            color: black;
+            font-weight: bold;
+        }
+        #popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #ffdddd;
+            padding: 40px;
+            border: 4px solid #ff0000;
+            border-radius: 24px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        #final-stats {
+            display: none;
+            margin-top: 20px;
+        }
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Teste Bíblico - Livro de Gênesis</h1>
+
+    <div id="stats">
+        <p>Corretas: <span id="correctCount">0</span></p>
+        <p>Incorretas: <span id="wrongCount">0</span></p>
+        <p>Pendentes: <span id="pendingCount"></span></p>
+    </div>
+
+    <div class="question-container">
+        <p id="question"></p>
+        <div id="answers"></div>
+    </div>
+
+    <p id="reference"></p>
+    <p id="message"></p>
+
+    <button id="confirmButton">Confirmar Resposta</button>
+    <button id="nextButton">Próxima Pergunta</button>
+
+    <div id="popup">
+        <p>Leia mais a Bíblia!</p>
+        <button onclick="closePopup()">Fechar</button>
+    </div>
+
+    <div id="final-stats">
+        <h2>Resultados Finais</h2>
+        <p id="final-message"></p>
+        <p>Total de Corretas: <span id="finalCorrect"></span></p>
+        <p>Total de Incorretas: <span id="finalWrong"></span></p>
+    </div>
+
+    <script>
+        const questions = [
+			{ question: "Quem criou o céu e a terra?", answers: ["Adão", "Moisés", "Deus", "Noé"], correct: "Deus", reference: "Gênesis 1:1" },
+			{ question: "Quem foi o primeiro homem criado por Deus?", answers: ["Noé", "Caim", "Adão", "Abraão"], correct: "Adão", reference: "Gênesis 2:7" },
+			{ question: "Qual era o nome da mulher criada a partir da costela de Adão?", answers: ["Sara", "Eva", "Rebeca", "Raquel"], correct: "Eva", reference: "Gênesis 2:22" },
+			{ question: "Qual foi o primeiro filho de Adão e Eva?", answers: ["Sete", "Caim", "Enoque", "Noé"], correct: "Caim", reference: "Gênesis 4:1" },
+			{ question: "Quem foi o irmão de Caim?", answers: ["Enoque", "Lameque", "Abel", "Jafé"], correct: "Abel", reference: "Gênesis 4:2" },
+			{ question: "Quem construiu a arca para sobreviver ao dilúvio?", answers: ["Abraão", "Moisés", "Noé", "Ló"], correct: "Noé", reference: "Gênesis 6:14" },
+			{ question: "Quantos dias e noites choveu no dilúvio?", answers: ["30", "7", "40", "50"], correct: "40", reference: "Gênesis 7:12" },
+			{ question: "Qual foi o sinal da aliança de Deus com Noé?", answers: ["Arco-íris", "Estrela", "Monte Ararate", "Pomba"], correct: "Arco-íris", reference: "Gênesis 9:13" },
+			{ question: "Quem era o pai de Abraão?", answers: ["Terá", "Ló", "Naor", "Isaac"], correct: "Terá", reference: "Gênesis 11:27" },
+			{ question: "Qual o nome da esposa de Abraão?", answers: ["Rebeca", "Sara", "Raquel", "Eva"], correct: "Sara", reference: "Gênesis 11:29" },
+			{ question: "Qual cidade Deus destruiu por causa do pecado?", answers: ["Babel", "Jericó", "Sodoma", "Betel"], correct: "Sodoma", reference: "Gênesis 19:24" },
+			{ question: "Quem foi transformada em estátua de sal?", answers: ["Sara", "Esposa de Ló", "Rebeca", "Raquel"], correct: "Esposa de Ló", reference: "Gênesis 19:26" },
+			{ question: "Como se chamava o filho prometido a Abraão e Sara?", answers: ["Ismael", "Esaú", "Isaac", "Jacó"], correct: "Isaac", reference: "Gênesis 21:3" },
+			{ question: "Quem foi oferecido como sacrifício por Abraão?", answers: ["Ismael", "Jacó", "Esaú", "Isaac"], correct: "Isaac", reference: "Gênesis 22:9" },
+			{ question: "Quem era o pai de Jacó e Esaú?", answers: ["Abraão", "Isaac", "Noé", "Ló"], correct: "Isaac", reference: "Gênesis 25:25-26" },
+			{ question: "Qual irmão vendeu sua primogenitura por um prato de lentilhas?", answers: ["Esaú", "Jacó", "Isaac", "Judá"], correct: "Esaú", reference: "Gênesis 25:33" },
+			{ question: "Quem teve o nome mudado para Israel?", answers: ["Abraão", "Jacó", "Esaú", "José"], correct: "Jacó", reference: "Gênesis 32:28" },
+			{ question: "Quantos filhos Jacó teve?", answers: ["10", "12", "8", "14"], correct: "12", reference: "Gênesis 35:22" },
+			{ question: "Qual era o nome do filho favorito de Jacó?", answers: ["Benjamim", "Judá", "José", "Efraim"], correct: "José", reference: "Gênesis 37:3" },
+			{ question: "O que os irmãos de José fizeram com ele?", answers: ["Mataram", "Venderam como escravo", "Fugiram", "Cuidaram"], correct: "Venderam como escravo", reference: "Gênesis 37:28" },
+			{ question: "Quem interpretava sonhos no Egito?", answers: ["Faraó", "José", "Jacó", "Arão"], correct: "José", reference: "Gênesis 41:15" },
+			{ question: "Quantos anos de fartura o Egito teve, conforme o sonho de Faraó?", answers: ["5", "7", "10", "12"], correct: "7", reference: "Gênesis 41:26" },
+			{ question: "Qual era o nome do pai de José?", answers: ["Isaac", "Abraão", "Jacó", "Esaú"], correct: "Jacó", reference: "Gênesis 37:3" },
+			{ question: "Quem recebeu a túnica colorida de Jacó?", answers: ["Judá", "Benjamim", "José", "Levi"], correct: "José", reference: "Gênesis 37:3" },
+			{ question: "Quem foi a mãe de Ismael?", answers: ["Sara", "Rebeca", "Hagar", "Raquel"], correct: "Hagar", reference: "Gênesis 16:15" },
+			{ question: "Quem se reconciliou com seu irmão depois de muitos anos?", answers: ["Jacó e Esaú", "José e Judá", "Abraão e Ló", "Caim e Abel"], correct: "Jacó e Esaú", reference: "Gênesis 33:4" },
+			{ question: "Quem viu a escada que ia até o céu em um sonho?", answers: ["Esaú", "Jacó", "Abraão", "José"], correct: "Jacó", reference: "Gênesis 28:12" },
+			{ question: "Quem foi vendido por 20 peças de prata?", answers: ["Esaú", "Judá", "José", "Benjamim"], correct: "José", reference: "Gênesis 37:28" },
+			{ question: "Quantos dias o mundo foi criado?", answers: ["6", "7", "8", "5"], correct: "6", reference: "Gênesis 1:31" },
+			{ question: "Quem foi abençoado por Jacó antes de sua morte?", answers: ["Apenas José", "Apenas seus netos", "Seus doze filhos", "Apenas Judá"], correct: "Seus doze filhos", reference: "Gênesis 49:28" },
+			{ question: "Quem deu nome aos animais no Jardim do Éden?", answers: ["Deus", "Adão", "Noé", "Abraão"], correct: "Adão", reference: "Gênesis 2:19-20" },
+			{ question: "Qual foi a punição de Adão e Eva por comerem do fruto proibido?", answers: ["Foram expulsos do Jardim do Éden", "Morreram imediatamente", "Perderam a fala", "Viraram anjos"], correct: "Foram expulsos do Jardim do Éden", reference: "Gênesis 3:23-24" },
+			{ question: "Quem foi o pai de Noé?", answers: ["Lameque", "Matusalém", "Enos", "Sete"], correct: "Lameque", reference: "Gênesis 5:28-29" },
+			{ question: "Qual foi o tamanho da arca construída por Noé, em côvados?", answers: ["200 de comprimento", "300 de comprimento", "150 de comprimento", "500 de comprimento"], correct: "300 de comprimento", reference: "Gênesis 6:15" },
+			{ question: "O que Noé fez logo após sair da arca?", answers: ["Ofereceu um sacrifício a Deus", "Construiu outra arca", "Plantou uma árvore", "Voltou para Canaã"], correct: "Ofereceu um sacrifício a Deus", reference: "Gênesis 8:20" },
+			{ question: "Qual foi o primeiro filho de Abraão?", answers: ["Isaque", "Ismael", "Esaú", "Judá"], correct: "Ismael", reference: "Gênesis 16:15" },
+			{ question: "Qual era o nome original de Abraão?", answers: ["Abrão", "Adão", "Enos", "Noé"], correct: "Abrão", reference: "Gênesis 17:5" },
+			{ question: "Como Deus destruiu Sodoma e Gomorra?", answers: ["Com um dilúvio", "Com fogo e enxofre", "Com terremotos", "Com ventos fortes"], correct: "Com fogo e enxofre", reference: "Gênesis 19:24" },
+			{ question: "Quem olhou para trás e virou uma estátua de sal?", answers: ["A esposa de Ló", "Rebeca", "Sara", "Raquel"], correct: "A esposa de Ló", reference: "Gênesis 19:26" },
+			{ question: "Quem era o servo enviado para buscar uma esposa para Isaque?", answers: ["Eliezer", "Ló", "Agar", "Esaú"], correct: "Eliezer", reference: "Gênesis 24:2-4" },
+			{ question: "Quem era o irmão mais novo de José?", answers: ["Benjamim", "Rubem", "Judá", "Simeão"], correct: "Benjamim", reference: "Gênesis 35:18" },
+			{ question: "Como Faraó recompensou José por interpretar seus sonhos?", answers: ["Nomeou José governador do Egito", "Deu ouro a José", "Libertou José e o enviou para Canaã", "Ofereceu um jantar para José"], correct: "Nomeou José governador do Egito", reference: "Gênesis 41:41" },
+			{ question: "Qual foi o nome do pai de Jacó?", answers: ["Isaque", "Abraão", "Noé", "Esaú"], correct: "Isaque", reference: "Gênesis 25:26" },
+			{ question: "Quem disse: 'Sou eu o guarda do meu irmão?'", answers: ["Caim", "Abel", "Sete", "Jacó"], correct: "Caim", reference: "Gênesis 4:9" },
+			{ question: "Qual era a idade de Abraão quando Isaque nasceu?", answers: ["75 anos", "90 anos", "100 anos", "120 anos"], correct: "100 anos", reference: "Gênesis 21:5" },
+			{ question: "Quem era o rei de Salém que abençoou Abraão?", answers: ["Melquisedeque", "Abimeleque", "Faraó", "Ló"], correct: "Melquisedeque", reference: "Gênesis 14:18-19" },
+			{ question: "Como Jacó conseguiu o direito de primogenitura de Esaú?", answers: ["Comprando por um prato de lentilhas", "Recebendo de graça", "Tomando à força", "Com a ajuda de Rebeca"], correct: "Comprando por um prato de lentilhas", reference: "Gênesis 25:33" },
+			{ question: "Quem viu Deus em um sonho e lutou com um anjo?", answers: ["Jacó", "Isaque", "Abraão", "Noé"], correct: "Jacó", reference: "Gênesis 32:24-28" },
+			{ question: "Qual foi o nome dado por Jacó ao lugar onde lutou com o anjo?", answers: ["Peniel", "Canaã", "Betel", "Harã"], correct: "Peniel", reference: "Gênesis 32:30" },
+			{ question: "Qual foi o sonho que José teve quando era jovem?", answers: ["O sol, a lua e 11 estrelas se curvavam diante dele", "Ele atravessava um rio em terra seca", "Ele construía uma torre", "Ele via uma escada para o céu"], correct: "O sol, a lua e 11 estrelas se curvavam diante dele", reference: "Gênesis 37:9" }
+				];
+
+        let currentQuestionIndex = 0;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let pendingCount = questions.length;
+        
+        const shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+
+        function updateStats() {
+            document.getElementById("correctCount").innerText = correctCount;
+            document.getElementById("wrongCount").innerText = wrongCount;
+            document.getElementById("pendingCount").innerText = pendingCount;
+        }
+
+        function loadQuestion() {
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            document.getElementById("question").innerText = questionData.question;
+            document.getElementById("reference").innerText = "";
+            document.getElementById("message").innerText = "";
+            const answersContainer = document.getElementById("answers");
+            answersContainer.innerHTML = "";
+
+            questionData.answers.forEach(answer => {
+                const button = document.createElement("button");
+                button.innerText = answer;
+                button.onclick = () => selectAnswer(button);
+                answersContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedButton) {
+            const buttons = document.querySelectorAll("#answers button");
+            buttons.forEach(button => button.classList.remove("selected"));
+            selectedButton.classList.add("selected");
+        }
+
+        function confirmAnswer() {
+            const selectedButton = document.querySelector("#answers button.selected");
+            if (!selectedButton) {
+                alert("Por favor, selecione uma resposta!");
+                return;
+            }
+
+            const selectedAnswer = selectedButton.innerText;
+            const questionData = shuffledQuestions[currentQuestionIndex];
+
+            if (selectedAnswer === questionData.correct) {
+                correctCount++;
+                document.getElementById("message").innerText = `Certa Resposta! Referência: (${questionData.reference}).`;
+                document.getElementById("message").style.color = "green";
+            } else {
+                wrongCount++;
+                document.getElementById("message").innerText = `Resposta errada! A correta é "${questionData.correct}" (${questionData.reference}).`;
+                document.getElementById("message").style.color = "red";
+                document.getElementById("popup").style.display = "block";
+            }
+
+            
+            pendingCount--;
+            updateStats();
+
+            document.getElementById("confirmButton").disabled = true;
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                document.getElementById("confirmButton").disabled = false;
+            } else {
+                showFinalStats();
+            }
+        }
+
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
+        }
+
+        function showFinalStats() {
+            const finalMessage = document.getElementById("final-message");
+            const finalCorrect = document.getElementById("finalCorrect");
+            const finalWrong = document.getElementById("finalWrong");
+
+            finalCorrect.innerText = correctCount;
+            finalWrong.innerText = wrongCount;
+
+            if (correctCount > wrongCount) {
+                finalMessage.innerText = "Parabéns! Você está acima da média!";
+            } else {
+                finalMessage.innerText = "Leia mais a Bíblia!";
+            }
+
+            document.getElementById("final-stats").style.display = "block";
+        }
+
+        document.getElementById("confirmButton").addEventListener("click", confirmAnswer);
+        document.getElementById("nextButton").addEventListener("click", nextQuestion);
+
+        updateStats();
+        loadQuestion();
+    </script>
+</body>
+</html>
